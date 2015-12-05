@@ -34,17 +34,43 @@ __FBSDID("$FreeBSD$");
 #include <sys/param.h>
 #include <sys/systm.h>
 #include <sys/kernel.h>
+#include <sys/extattr.h>
+#include <sys/fcntl.h>
 #include <sys/ktr.h>
 #include <sys/libkern.h>
+#include <sys/namei.h>
 #include <sys/pax.h>
 #include <sys/proc.h>
 #include <sys/stat.h>
 #include <sys/sysctl.h>
+#include <sys/uio.h>
+#include <sys/vnode.h>
 
 FEATURE(hbsdcontrol, "HardenedBSD's FS-EA based control subsystem.");
 
 static int pax_hbsdcontrol_status = PAX_FEATURE_SIMPLE_ENABLED;
 TUNABLE_INT("hardening.hbsdcontrol.status", &pax_hbsdcontrol_status);
+
+struct pax_feature_entry {
+	const char	*fs_ea_attribute;
+	const uint32_t	feature_bit;
+};
+
+const struct pax_feature_entry pax_features[] = {
+	{"pax_aslr",		PAX_NOTE_ASLR},
+	{"pax_noaslr",		PAX_NOTE_NOASLR},
+	{"pax_segvguard",	PAX_NOTE_SEGVGUARD},
+	{"pax_nosegvguard",	PAX_NOTE_NOSEGVGUARD},
+	{"pax_pageexec",	PAX_NOTE_PAGEEXEC},
+	{"pax_nopageexec",	PAX_NOTE_NOPAGEEXEC},
+	{"pax_mprotect",	PAX_NOTE_MPROTECT},
+	{"pax_nomprotect",	PAX_NOTE_NOMPROTECT},
+	{"pax_shlibrandom",	PAX_NOTE_SHLIBRANDOM},
+	{"pax_noshlibrandom",	PAX_NOTE_NOSHLIBRANDOM},
+	{"pax_disallowmap32bit",	PAX_NOTE_DISALLOWMAP32BIT},
+	{"pax_nodisallowmap32bit",	PAX_NOTE_NODISALLOWMAP32BIT},
+	{NULL, 0}
+};
 
 #ifdef PAX_SYSCTLS
 SYSCTL_DECL(_hardening_pax);
@@ -58,17 +84,83 @@ SYSCTL_INT(_hardening_pax_hbsdcontrol, OID_AUTO, status,
     "status: "
     "0 - disabled, "
     "1 - enabled");
-#endif
+#endif /* PAX_SYSCTLS */
+
+uint32_t
+pax_hbsdcontrol_parse_fsea_flags(struct thread *td, const char *fn, uint32_t *flags)
+{
+	struct nameidata nd;
+	struct uio uio;
+	struct iovec iov;
+	unsigned char feature_status = 0;
+	int error;
+	int i;
+	uint32_t parsed_flags = 0;
+
+	if (td == NULL || fn == NULL || flags == NULL)
+		return (1);
+
+	NDINIT(&nd, LOOKUP, LOCKLEAF|FOLLOW, UIO_SYSSPACE, fn, td);
+	error = namei(&nd);
+	if (error == 0) {
+		error = vn_lock(nd.ni_vp, LK_EXCLUSIVE|LK_RETRY);
+		if (error != 0)
+			panic("0 with LK_RETRY?");
+		for (i = 0; pax_features[i].fs_ea_attribute != NULL; i++) {
+			memset(&uio, 0, sizeof(uio));
+			memset(&iov, 0, sizeof(iov));
+			feature_status = 0;
+
+			iov.iov_base = &feature_status;
+			iov.iov_len = sizeof(feature_status);
+			uio.uio_iov = &iov;
+			uio.uio_iovcnt = 1;
+			uio.uio_offset = 0;
+			uio.uio_rw = UIO_READ;
+			uio.uio_segflg = UIO_SYSSPACE;
+			uio.uio_td = td;
+			uio.uio_resid = sizeof(feature_status);
+
+			error = VOP_GETEXTATTR(nd.ni_vp, EXTATTR_NAMESPACE_SYSTEM,
+			    pax_features[i].fs_ea_attribute, &uio, NULL, td->td_ucred, td);
+
+			if (error == 0) {
+				feature_status -= '0';
+				switch (feature_status) {
+				case 0:
+					parsed_flags &= ~pax_features[i].feature_bit;
+					break;
+				case 1:
+					parsed_flags |= pax_features[i].feature_bit;
+					break;
+				default:
+					printf("%s: unknown state: %c [%d]\n",
+					    pax_features[i].fs_ea_attribute, feature_status, feature_status);
+					break;
+				}
+			} else
+				/*
+				 * Use the system default settings
+				 */
+				;
+		}
+		VOP_UNLOCK(nd.ni_vp, 0);
+		NDFREE(&nd, 0);
+	}
+
+	*flags = parsed_flags;
+
+	return (0);
+}
+
 
 static void
 pax_hbsdcontrol_sysinit(void)
 {
 
 	switch (pax_hbsdcontrol_status) {
-	case PAX_FEATURE_DISABLED:
-	case PAX_FEATURE_OPTIN:
-	case PAX_FEATURE_OPTOUT:
-	case PAX_FEATURE_FORCE_ENABLED:
+	case PAX_FEATURE_SIMPLE_DISABLED:
+	case PAX_FEATURE_SIMPLE_ENABLED:
 		break;
 	default:
 		printf("[HBSD CONTROL] WARNING, invalid settings in loader.conf!"
@@ -76,7 +168,7 @@ pax_hbsdcontrol_sysinit(void)
 		pax_hbsdcontrol_status = PAX_FEATURE_SIMPLE_ENABLED;
 		break;
 	}
-	printf("[HBSD CONTROL] status: %s\n", pax_status_str[pax_hbsdcontrol_status]);
+	printf("[HBSD CONTROL] status: %s\n", pax_status_simple_str[pax_hbsdcontrol_status]);
 }
 SYSINIT(pax_hbsdcontrol, SI_SUB_PAX, SI_ORDER_FIRST, pax_hbsdcontrol_sysinit, NULL);
 

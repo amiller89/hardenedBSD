@@ -380,6 +380,9 @@ do_execve(td, args, mac_p)
 	struct pmckern_procexec pe;
 #endif
 	static const char fexecv_proc_title[] = "(fexecv)";
+#ifdef PAX
+	uint32_t pax_settings = 0;
+#endif
 
 	imgp = &image_params;
 
@@ -459,10 +462,22 @@ interpret:
 		imgp->vp = newtextvp;
 	}
 
-#ifdef PAX
-	error = pax_elf(imgp, td, 0);
+
+
+#ifdef PAX_HBSDCONTROL
+	/*
+	 * XXXOP: interpreted?
+	 */
+	error = pax_hbsdcontrol_parse_fsea_flags(curthread, args->fname, &pax_settings);
 	if (error)
 		goto exec_fail_dealloc;
+#endif
+
+#ifdef PAX
+	error = pax_elf(imgp, td, pax_settings);
+	if (error) {
+		goto exec_fail_dealloc;
+	}
 #endif
 
 	/*

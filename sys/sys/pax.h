@@ -101,6 +101,11 @@ struct prison *pax_get_prison_td(struct thread *td);
 void pax_init_prison(struct prison *pr);
 
 /*
+ * XXXOP: foo
+ */
+uint32_t pax_hbsdcontrol_parse_fsea_flags(struct thread *td, const char *fn, uint32_t *flags);
+
+/*
  * ASLR related functions
  */
 bool pax_aslr_active(struct proc *p);
