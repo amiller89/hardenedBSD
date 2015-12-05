@@ -30,6 +30,7 @@ SUBDIR=adjkerntz \
 	ggate \
 	growfs \
 	gvinum \
+	hbsdcontrol \
 	ifconfig \
 	init \
 	kldconfig \
