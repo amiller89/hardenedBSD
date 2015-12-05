@@ -67,8 +67,8 @@ const struct pax_feature_entry pax_features[] = {
 	{"pax_nomprotect",	PAX_NOTE_NOMPROTECT},
 	{"pax_shlibrandom",	PAX_NOTE_SHLIBRANDOM},
 	{"pax_noshlibrandom",	PAX_NOTE_NOSHLIBRANDOM},
-	{"pax_disallowmap32bit",	PAX_NOTE_DISALLOWMAP32BIT},
-	{"pax_nodisallowmap32bit",	PAX_NOTE_NODISALLOWMAP32BIT},
+	{"pax_disallow_map32bit",	PAX_NOTE_DISALLOWMAP32BIT},
+	{"pax_nodisallow_map32bit",	PAX_NOTE_NODISALLOWMAP32BIT},
 	{NULL, 0}
 };
 

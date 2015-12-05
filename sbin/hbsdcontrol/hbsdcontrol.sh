@@ -178,11 +178,11 @@ class_system_state_extattr()
 
 	if [ ${state} = -1 ]
 	then
-		${GETEXTATTR} ${namespace} ${feature} ${file}
+		${GETEXTATTR} ${namespace} pax_${feature} ${file}
 	else
-		${RMEXTATTR} ${namespace} ${feature} ${file} > /dev/null 2>&1
-		${RMEXTATTR} ${namespace} no_${feature} ${file} > /dev/null 2>&1
-		${SETEXTATTR} ${namespace} ${feature} ${state} ${file}
+		${RMEXTATTR} ${namespace} pax_${feature} ${file} > /dev/null 2>&1
+		${RMEXTATTR} ${namespace} pax_no${feature} ${file} > /dev/null 2>&1
+		${SETEXTATTR} ${namespace} pax_${feature} ${state} ${file}
 	fi	
 }
 
