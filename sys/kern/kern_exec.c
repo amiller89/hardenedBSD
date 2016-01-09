@@ -468,7 +468,7 @@ interpret:
 	/*
 	 * XXXOP: interpreted?
 	 */
-	error = pax_hbsdcontrol_parse_fsea_flags(curthread, args->fname, &pax_settings);
+	error = pax_hbsdcontrol_parse_fsea_flags(curthread, imgp, &pax_settings);
 	if (error)
 		goto exec_fail_dealloc;
 #endif

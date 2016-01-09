@@ -36,6 +36,8 @@ __FBSDID("$FreeBSD$");
 #include <sys/kernel.h>
 #include <sys/extattr.h>
 #include <sys/fcntl.h>
+#include <sys/imgact.h>
+#include <sys/imgact_elf.h>
 #include <sys/ktr.h>
 #include <sys/libkern.h>
 #include <sys/namei.h>
@@ -87,9 +89,8 @@ SYSCTL_INT(_hardening_pax_hbsdcontrol, OID_AUTO, status,
 #endif /* PAX_SYSCTLS */
 
 uint32_t
-pax_hbsdcontrol_parse_fsea_flags(struct thread *td, const char *fn, uint32_t *flags)
+pax_hbsdcontrol_parse_fsea_flags(struct thread *td, struct image_params *imgp, uint32_t *flags)
 {
-	struct nameidata nd;
 	struct uio uio;
 	struct iovec iov;
 	unsigned char feature_status = 0;
@@ -97,55 +98,46 @@ pax_hbsdcontrol_parse_fsea_flags(struct thread *td, const char *fn, uint32_t *fl
 	int i;
 	uint32_t parsed_flags = 0;
 
-	if (td == NULL || fn == NULL || flags == NULL)
-		return (1);
+	KASSERT(td != NULL, ("%s: TODO foo", __func__));
+	KASSERT(imgp != NULL, ("%s: TODO bar", __func__));
+	KASSERT(flags != NULL, ("%s: TODO baz", __func__));
 
-	NDINIT(&nd, LOOKUP, LOCKLEAF|FOLLOW, UIO_SYSSPACE, fn, td);
-	error = namei(&nd);
-	if (error == 0) {
-		error = vn_lock(nd.ni_vp, LK_EXCLUSIVE|LK_RETRY);
-		if (error != 0)
-			panic("0 with LK_RETRY?");
-		for (i = 0; pax_features[i].fs_ea_attribute != NULL; i++) {
-			memset(&uio, 0, sizeof(uio));
-			memset(&iov, 0, sizeof(iov));
-			feature_status = 0;
+	for (i = 0; pax_features[i].fs_ea_attribute != NULL; i++) {
+		memset(&uio, 0, sizeof(uio));
+		memset(&iov, 0, sizeof(iov));
+		feature_status = 0;
 
-			iov.iov_base = &feature_status;
-			iov.iov_len = sizeof(feature_status);
-			uio.uio_iov = &iov;
-			uio.uio_iovcnt = 1;
-			uio.uio_offset = 0;
-			uio.uio_rw = UIO_READ;
-			uio.uio_segflg = UIO_SYSSPACE;
-			uio.uio_td = td;
-			uio.uio_resid = sizeof(feature_status);
+		iov.iov_base = &feature_status;
+		iov.iov_len = sizeof(feature_status);
+		uio.uio_iov = &iov;
+		uio.uio_iovcnt = 1;
+		uio.uio_offset = 0;
+		uio.uio_rw = UIO_READ;
+		uio.uio_segflg = UIO_SYSSPACE;
+		uio.uio_td = td;
+		uio.uio_resid = sizeof(feature_status);
 
-			error = VOP_GETEXTATTR(nd.ni_vp, EXTATTR_NAMESPACE_SYSTEM,
-			    pax_features[i].fs_ea_attribute, &uio, NULL, td->td_ucred, td);
+		error = VOP_GETEXTATTR(imgp->vp, EXTATTR_NAMESPACE_SYSTEM,
+		    pax_features[i].fs_ea_attribute, &uio, NULL, td->td_ucred, td);
 
-			if (error == 0) {
-				feature_status -= '0';
-				switch (feature_status) {
-				case 0:
-					parsed_flags &= ~pax_features[i].feature_bit;
-					break;
-				case 1:
-					parsed_flags |= pax_features[i].feature_bit;
-					break;
-				default:
-					printf("%s: unknown state: %c [%d]\n",
-					    pax_features[i].fs_ea_attribute, feature_status, feature_status);
-					break;
-				}
-			} else
-				/*
-				 * Use the system default settings
-				 */
-				;
+		if (error == 0) {
+			feature_status -= '0';
+			switch (feature_status) {
+			case 0:
+				parsed_flags &= ~pax_features[i].feature_bit;
+				break;
+			case 1:
+				parsed_flags |= pax_features[i].feature_bit;
+				break;
+			default:
+				printf("%s: unknown state: %c [%d]\n",
+				    pax_features[i].fs_ea_attribute, feature_status, feature_status);
+				break;
+			}
 		}
-		VOP_UNLOCK(nd.ni_vp, 0);
-		NDFREE(&nd, 0);
+		/* else
+		 * 	use the system default settings
+		 */
 	}
 
 	*flags = parsed_flags;

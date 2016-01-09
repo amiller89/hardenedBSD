@@ -103,7 +103,7 @@ void pax_init_prison(struct prison *pr);
 /*
  * XXXOP: foo
  */
-uint32_t pax_hbsdcontrol_parse_fsea_flags(struct thread *td, const char *fn, uint32_t *flags);
+uint32_t pax_hbsdcontrol_parse_fsea_flags(struct thread *td, struct image_params *imgp, uint32_t *flags);
 
 /*
  * ASLR related functions
