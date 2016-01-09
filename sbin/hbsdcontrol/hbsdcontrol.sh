@@ -182,7 +182,16 @@ class_system_state_extattr()
 	else
 		${RMEXTATTR} ${namespace} pax_${feature} ${file} > /dev/null 2>&1
 		${RMEXTATTR} ${namespace} pax_no${feature} ${file} > /dev/null 2>&1
-		${SETEXTATTR} ${namespace} pax_${feature} ${state} ${file}
+		case ${state} in
+			0)
+				${SETEXTATTR} ${namespace} pax_no${feature} 1 ${file}
+				${SETEXTATTR} ${namespace} pax_${feature} 0 ${file}
+				;;
+			1)
+				${SETEXTATTR} ${namespace} pax_${feature} 1 ${file}
+				${SETEXTATTR} ${namespace} pax_no${feature} 0 ${file}
+				;;
+		esac
 	fi	
 }
 
