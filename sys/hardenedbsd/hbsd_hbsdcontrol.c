@@ -118,7 +118,7 @@ pax_hbsdcontrol_parse_fsea_flags(struct thread *td, struct image_params *imgp, u
 		uio.uio_resid = sizeof(feature_status);
 
 		error = VOP_GETEXTATTR(imgp->vp, EXTATTR_NAMESPACE_SYSTEM,
-		    pax_features[i].fs_ea_attribute, &uio, NULL, td->td_ucred, td);
+		    pax_features[i].fs_ea_attribute, &uio, NULL, NULL, td);
 
 		if (error == 0) {
 			feature_status -= '0';
