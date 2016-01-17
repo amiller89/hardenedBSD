@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2015 Oliver Pinter <oliver.pinter@HardenedBSD.org>
+ * Copyright (c) 2015-2016 Oliver Pinter <oliver.pinter@HardenedBSD.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -162,5 +162,5 @@ pax_hbsdcontrol_sysinit(void)
 	}
 	printf("[HBSD CONTROL] status: %s\n", pax_status_simple_str[pax_hbsdcontrol_status]);
 }
-SYSINIT(pax_hbsdcontrol, SI_SUB_PAX, SI_ORDER_FIRST, pax_hbsdcontrol_sysinit, NULL);
+SYSINIT(pax_hbsdcontrol, SI_SUB_PAX, SI_ORDER_SECOND, pax_hbsdcontrol_sysinit, NULL);
 
