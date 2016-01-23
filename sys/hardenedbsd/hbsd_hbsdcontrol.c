@@ -89,14 +89,14 @@ SYSCTL_INT(_hardening_pax_hbsdcontrol, OID_AUTO, status,
 #endif /* PAX_SYSCTLS */
 
 uint32_t
-pax_hbsdcontrol_parse_fsea_flags(struct thread *td, struct image_params *imgp, uint32_t *flags)
+pax_hbsdcontrol_parse_fsea_flags(struct thread *td, struct image_params *imgp, pax_flag_t *flags)
 {
 	struct uio uio;
 	struct iovec iov;
 	unsigned char feature_status = 0;
 	int error;
 	int i;
-	uint32_t parsed_flags = 0;
+	pax_flag_t parsed_flags = 0;
 
 	KASSERT(td != NULL, ("%s: TODO foo", __func__));
 	KASSERT(imgp != NULL, ("%s: TODO bar", __func__));

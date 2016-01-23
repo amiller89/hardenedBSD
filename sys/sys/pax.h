@@ -101,9 +101,9 @@ struct prison *pax_get_prison_td(struct thread *td);
 void pax_init_prison(struct prison *pr);
 
 /*
- * XXXOP: foo
+ * HardenedBSD's hbsdcontol related functions
  */
-uint32_t pax_hbsdcontrol_parse_fsea_flags(struct thread *td, struct image_params *imgp, uint32_t *flags);
+pax_flag_t pax_hbsdcontrol_parse_fsea_flags(struct thread *td, struct image_params *imgp, pax_flag_t *flags);
 
 /*
  * ASLR related functions

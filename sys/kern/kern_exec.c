@@ -381,7 +381,7 @@ do_execve(td, args, mac_p)
 #endif
 	static const char fexecv_proc_title[] = "(fexecv)";
 #ifdef PAX
-	uint32_t pax_settings = 0;
+	pax_flag_t pax_settings = 0;
 #endif
 
 	imgp = &image_params;
