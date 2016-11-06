@@ -476,7 +476,7 @@ interpret:
 #endif
 
 #ifdef PAX
-	error = pax_elf(imgp, td, pax_settings);
+	error = pax_elf(td, imgp, pax_settings);
 	if (error) {
 		goto exec_fail_dealloc;
 	}

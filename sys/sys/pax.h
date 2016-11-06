@@ -93,7 +93,7 @@ extern const char *pax_status_simple_str[];
  * generic pax functions
  */
 uint64_t pax_get_hardenedbsd_version(void);
-int pax_elf(struct image_params *imgp, struct thread *td, pax_flag_t mode);
+int pax_elf(struct thread *td, struct image_params *imgp, pax_flag_t mode);
 void pax_get_flags(struct proc *p, pax_flag_t *flags);
 void pax_get_flags_td(struct thread *td, pax_flag_t *flags);
 struct prison *pax_get_prison(struct proc *p);
