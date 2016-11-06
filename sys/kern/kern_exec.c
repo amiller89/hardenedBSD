@@ -462,12 +462,14 @@ interpret:
 		imgp->vp = newtextvp;
 	}
 
-
+	/*
+	 * Check file permissions (also 'opens' file)
+	 */
+	error = exec_check_permissions(imgp);
+	if (error)
+		goto exec_fail_dealloc;
 
 #ifdef PAX_HBSDCONTROL
-	/*
-	 * XXXOP: interpreted?
-	 */
 	error = pax_hbsdcontrol_parse_fsea_flags(curthread, imgp, &pax_settings);
 	if (error)
 		goto exec_fail_dealloc;
@@ -479,13 +481,6 @@ interpret:
 		goto exec_fail_dealloc;
 	}
 #endif
-
-	/*
-	 * Check file permissions (also 'opens' file)
-	 */
-	error = exec_check_permissions(imgp);
-	if (error)
-		goto exec_fail_dealloc;
 
 	imgp->object = imgp->vp->v_object;
 	if (imgp->object != NULL)
