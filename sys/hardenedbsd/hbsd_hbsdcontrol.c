@@ -93,14 +93,18 @@ pax_hbsdcontrol_parse_fsea_flags(struct thread *td, struct image_params *imgp, p
 {
 	struct uio uio;
 	struct iovec iov;
-	unsigned char feature_status = 0;
+	unsigned char feature_status;
 	int error;
 	int i;
-	pax_flag_t parsed_flags = 0;
+	pax_flag_t parsed_flags;
 
-	KASSERT(td != NULL, ("%s: TODO foo", __func__));
-	KASSERT(imgp != NULL, ("%s: TODO bar", __func__));
-	KASSERT(flags != NULL, ("%s: TODO baz", __func__));
+	feature_status = 0;
+	parsed_flags = 0;
+
+	if (!pax_hbsdcontrol_active()) {
+		*flags = 0;
+		return (0);
+	}
 
 	for (i = 0; pax_features[i].fs_ea_attribute != NULL; i++) {
 		memset(&uio, 0, sizeof(uio));
@@ -134,10 +138,10 @@ pax_hbsdcontrol_parse_fsea_flags(struct thread *td, struct image_params *imgp, p
 				    pax_features[i].fs_ea_attribute, feature_status, feature_status);
 				break;
 			}
+		} else {
+			/* system defaults */
+			parsed_flags = 0;
 		}
-		/* else
-		 * 	use the system default settings
-		 */
 	}
 
 	*flags = parsed_flags;
