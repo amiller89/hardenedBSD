@@ -258,6 +258,16 @@ pax_elf(struct image_params *imgp, struct thread *td, pax_flag_t mode)
 {
 	pax_flag_t flags;
 
+#ifdef PAX_ACL
+#ifdef PAX_OVERRIDE_WITH_ACL
+	pax_get_flags_td(td, &flags);
+	if ((flags & PAX_NOTE_FINALIZED) == PAX_NOTE_FINALIZED)
+		return (0);
+#endif
+#endif
+
+	flags = 0;
+
 	if (pax_validate_flags(mode) != 0) {
 		pax_log_internal_imgp(imgp, PAX_LOG_DEFAULT,
 		    "unknown paxflags: %x", mode);
@@ -276,8 +286,6 @@ pax_elf(struct image_params *imgp, struct thread *td, pax_flag_t mode)
 
 		return (ENOEXEC);
 	}
-
-	flags = 0;
 
 #ifdef PAX_ASLR
 	flags |= pax_aslr_setup_flags(imgp, td, mode);
