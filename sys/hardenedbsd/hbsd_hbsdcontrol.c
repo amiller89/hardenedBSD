@@ -53,6 +53,8 @@ FEATURE(hbsdcontrol, "HardenedBSD's FS-EA based control subsystem.");
 static int pax_hbsdcontrol_status = PAX_FEATURE_SIMPLE_ENABLED;
 TUNABLE_INT("hardening.hbsdcontrol.status", &pax_hbsdcontrol_status);
 
+static bool pax_hbsdcontrol_active(void);
+
 struct pax_feature_entry {
 	const char	*fs_ea_attribute;
 	const uint32_t	feature_bit;
@@ -149,6 +151,18 @@ pax_hbsdcontrol_parse_fsea_flags(struct thread *td, struct image_params *imgp, p
 	return (0);
 }
 
+static bool
+pax_hbsdcontrol_active(void)
+{
+
+	if ((pax_hbsdcontrol_status & PAX_FEATURE_SIMPLE_ENABLED) == PAX_FEATURE_SIMPLE_ENABLED)
+		return (true);
+
+	if ((pax_hbsdcontrol_status & PAX_FEATURE_SIMPLE_DISABLED) == PAX_FEATURE_SIMPLE_DISABLED)
+		return (false);
+
+	return (true);
+}
 
 static void
 pax_hbsdcontrol_sysinit(void)
