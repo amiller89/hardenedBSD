@@ -61,18 +61,18 @@ struct pax_feature_entry {
 };
 
 const struct pax_feature_entry pax_features[] = {
-	{"pax_aslr",		PAX_NOTE_ASLR},
-	{"pax_noaslr",		PAX_NOTE_NOASLR},
-	{"pax_segvguard",	PAX_NOTE_SEGVGUARD},
-	{"pax_nosegvguard",	PAX_NOTE_NOSEGVGUARD},
-	{"pax_pageexec",	PAX_NOTE_PAGEEXEC},
-	{"pax_nopageexec",	PAX_NOTE_NOPAGEEXEC},
-	{"pax_mprotect",	PAX_NOTE_MPROTECT},
-	{"pax_nomprotect",	PAX_NOTE_NOMPROTECT},
-	{"pax_shlibrandom",	PAX_NOTE_SHLIBRANDOM},
-	{"pax_noshlibrandom",	PAX_NOTE_NOSHLIBRANDOM},
-	{"pax_disallow_map32bit",	PAX_NOTE_DISALLOWMAP32BIT},
-	{"pax_nodisallow_map32bit",	PAX_NOTE_NODISALLOWMAP32BIT},
+	{"hbsd.pax.aslr",			PAX_NOTE_ASLR},
+	{"hbsd.pax.noaslr",			PAX_NOTE_NOASLR},
+	{"hbsd.pax.segvguard",			PAX_NOTE_SEGVGUARD},
+	{"hbsd.pax.nosegvguard",		PAX_NOTE_NOSEGVGUARD},
+	{"hbsd.pax.pageexec",			PAX_NOTE_PAGEEXEC},
+	{"hbsd.pax.nopageexec",			PAX_NOTE_NOPAGEEXEC},
+	{"hbsd.pax.mprotect",			PAX_NOTE_MPROTECT},
+	{"hbsd.pax.nomprotect",			PAX_NOTE_NOMPROTECT},
+	{"hbsd.pax.shlibrandom",		PAX_NOTE_SHLIBRANDOM},
+	{"hbsd.pax.noshlibrandom",		PAX_NOTE_NOSHLIBRANDOM},
+	{"hbsd.pax.disallow_map32bit",		PAX_NOTE_DISALLOWMAP32BIT},
+	{"hbsd.pax.nodisallow_map32bit",	PAX_NOTE_NODISALLOWMAP32BIT},
 	{NULL, 0}
 };
 
