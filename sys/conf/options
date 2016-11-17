@@ -982,7 +982,7 @@ PAX_NOEXEC	opt_pax.h
 PAX_INSECURE_MODE	opt_pax.h
 PAX_HBSDCONTROL	opt_pax.h
 PAX_ACL		opt_pax.h
-PAX_ACL_OVERRIDE	opt_pax.h
+PAX_OVERRIDE_WITH_ACL	opt_pax.h
 HBSD_DEBUG	opt_pax.h
 
 # ASLR overwritable defaults
